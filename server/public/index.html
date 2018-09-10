@@ -1,0 +1,99 @@
+<!doctype html>
+<html>
+
+<head>
+  <title>Socket.IO chat</title>
+  <style>
+    .login {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font: 13px Helvetica, Arial;
+    }
+
+    form {
+      background: #000;
+      padding: 3px;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+    }
+
+    form input {
+      border: 0;
+      padding: 10px;
+      width: 90%;
+      margin-right: .5%;
+    }
+
+    form button {
+      width: 9%;
+      background: rgb(130, 224, 255);
+      border: none;
+      padding: 10px;
+    }
+
+    #messages {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    #messages li {
+      padding: 5px 10px;
+    }
+
+    #messages li:nth-child(odd) {
+      background: #eee;
+    }
+  </style>
+</head>
+
+<body>
+  <ul id="messages"></ul>
+  <canvas width="1000" height="1000" id="canvas"></canvas>
+  <div class="login">
+    <input id='name' type="text">
+    <button id='button'>login</button>
+    <input type="color" name="color" id="setcolor">
+  </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+  <script>
+    $(function () {
+      var canvas = document.getElementById("canvas");
+      var ctx = canvas.getContext("2d");
+      var socket = io();
+      document.getElementById('setcolor').addEventListener('change', (ev)=>console.log(ev.target.value))
+      document.getElementById('button').addEventListener('click', ()=>socket.emit('login', {name : document.getElementById('name').value }))
+      socket.on('SEND_STATE', function (msg) {
+        // console.log(msg);
+        ctx.clearRect(0,0,1000,1000)
+        msg.map(player => {
+          ctx.fillStyle = player.color;
+          ctx.fillRect(player.x-5, player.y-5, 10, 10)
+        })
+      });
+      document.addEventListener('click', function (ev) {
+        console.log({
+          x: ev.clientX,
+          y: ev.clientY
+        })
+        socket.emit('SET_TARGET', {
+          x: ev.clientX,
+          y: ev.clientY
+        })
+      })
+    });
+  </script>
+</body>
+
+</html>
